@@ -1,0 +1,52 @@
+# Make necessary imports 
+import pandas as pd
+import numpy as np
+# Sklean Imports 
+from sklearn import metrics, model_selection 
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score,recall_score,precision_score,f1_score
+
+
+# Load Training DF 
+df = pd.read_csv("https://github.com/andvise/DataAnalyticsDatasets/blob/6d5738101d173b97c565f143f945dedb9c42a400/dm_assignment2/sat_dataset_train.csv?raw=true")
+
+# Preprocess Training DF 
+df = df.replace([np.inf, -np.inf], np.nan) # first replace infs with nans
+df = df.replace(np.nan, 0) # now replace nans with 0s 
+
+# Create feature and label variables from Training DF 
+features = df.loc[:,:"rwh_2_max"]
+labels = df["target"]
+
+# Create train test split from our Training features and labels 
+train_items, test_items, train_labels, test_labels = model_selection.train_test_split(features, labels, test_size = 0.3)
+
+# Create the Random Forest Classifier
+rand_for_clf = RandomForestClassifier(n_estimators=300, max_depth=None, criterion="entropy",random_state=0)
+
+# Fit & Train Random Forest Model 
+rand_for_clf.fit(train_items,train_labels)
+
+# Load Testing DF 
+test_df = pd.read_csv("https://github.com/andvise/DataAnalyticsDatasets/blob/main/dm_assignment2/sat_dataset_test.csv?raw=true")
+
+# Preprocess Test DF 
+test_df = test_df.replace([np.inf, -np.inf], np.nan)
+test_df = test_df.replace(np.nan, 0)
+        
+# Create Features and Labels 
+test_features = test_df.loc[:,:"rwh_2_max"]
+test_labels = test_df["target"]
+
+# Make Predictions and Model Results 
+predictions =rand_for_clf.predict(test_features)
+random_forest_res = accuracy_score(predictions, test_labels)
+#print('Accuracy = ',random_forest_res)
+print('\n')
+print('Classification Report')
+print(classification_report(test_labels, predictions))
+print('\n')
+print('Accuracy Score =', accuracy_score(test_labels,predictions))
+print('Precision = ',precision_score(test_labels,predictions))
+print('Recall = ', recall_score(test_labels,predictions))
+print('F1 Score = ', f1_score(test_labels,predictions))
